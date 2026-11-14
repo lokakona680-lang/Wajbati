@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wajbati</title>
+<meta name="description" content="Log your meals, macros, water and weight">
+<meta name="theme-color" content="#0F1A14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wajbati">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Cairo:wght@500;700;800&family=Manrope:wght@400;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F4F7F2; --surface:#FFFFFF; --surface2:#EAF0EA; --fg:#16231B; --muted:#5B6B60; --line:#D8E2D9;
+  --accent:#2BB673; --accent-ink:#0B2416; --soft:#E3F3E9; --warn:#C0392B; --amber:#E8A317; --blue:#2F7FD1;
+  --fd:'Fraunces',Georgia,serif; --fb:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1A14; --surface:#16241C; --surface2:#1D2F24; --fg:#EAF4EC; --muted:#9DB3A3; --line:#2A3D31;
+    --accent:#3CD08A; --accent-ink:#06180E; --soft:#1B3427; --warn:#FF8A7A; --amber:#F2C14E; --blue:#6AAEF2; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1A14; --surface:#16241C; --surface2:#1D2F24; --fg:#EAF4EC; --muted:#9DB3A3; --line:#2A3D31;
+  --accent:#3CD08A; --accent-ink:#06180E; --soft:#1B3427; --warn:#FF8A7A; --amber:#F2C14E; --blue:#6AAEF2; color-scheme:dark;
+}
+:root[data-theme="light"]{
+  --bg:#F4F7F2; --surface:#FFFFFF; --surface2:#EAF0EA; --fg:#16231B; --muted:#5B6B60; --line:#D8E2D9;
+  --accent:#2BB673; --accent-ink:#0B2416; --soft:#E3F3E9; --warn:#C0392B; --amber:#E8A317; --blue:#2F7FD1; color-scheme:light;
+}
+:root[lang="ar"]{--fd:'Cairo',Tahoma,sans-serif;--fb:'Cairo',Tahoma,sans-serif}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--fb);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:calc(24px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3,p{margin:0}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:16px;padding-top:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--fd);font-weight:800;font-size:26px}
+.brand i{width:36px;height:36px;border-radius:12px;background:var(--accent);display:grid;place-items:center;flex:none}
+.brand svg{width:22px;height:22px}
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.pill{padding:6px 11px;border-radius:99px;border:1px solid var(--line);font-size:12px;font-weight:700;background:var(--surface)}
+.pill[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.icon-btn{width:34px;height:34px;border-radius:99px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;font-size:15px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.big{font-family:var(--fd);font-weight:800;font-size:44px;line-height:1.05}
+.muted{color:var(--muted)}
+.sec-title{font-family:var(--fd);font-weight:800;font-size:20px}
+.bar{height:10px;border-radius:99px;background:var(--surface2);overflow:hidden;margin-top:10px}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.bar.over>i{background:var(--warn)}
+.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.macro{background:var(--surface2);border-radius:14px;padding:10px;text-align:center}
+.macro b{display:block;font-size:18px}
+.macro small{color:var(--muted);font-size:12px}
+.goal{display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap}
+.goal input{width:110px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);font-weight:700}
+.glasses{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.glass{width:38px;height:44px;border-radius:10px;background:var(--surface2);color:var(--muted);display:grid;place-items:center;font-size:12px;font-weight:700}
+.glass.on{background:var(--blue);color:#fff}
+.chart{display:flex;align-items:flex-end;gap:8px;height:110px;margin-top:14px}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:6px}
+.chart i{display:block;width:100%;border-radius:8px 8px 4px 4px;background:var(--accent);min-height:2px}
+.chart i.today{background:var(--amber)}
+.chart small{font-size:11px;color:var(--muted)}
+.meal{padding:14px 0;border-top:1px solid var(--line)}
+.meal:first-of-type{border-top:0;padding-top:0}
+.meal-h{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.meal-h h3{font-family:var(--fd);font-size:20px;font-weight:800}
+.meal-h .acts{display:flex;gap:6px;align-items:center}
+.link{color:var(--blue);font-size:13px;font-weight:700;padding:4px 6px}
+.items{list-style:none;padding:0;margin:8px 0 0}
+.items li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.items li:last-child{border-bottom:0}
+.items .name{min-width:0;overflow-wrap:anywhere}
+.items .sub{display:block;font-size:12px;color:var(--muted)}
+.items .r{display:flex;gap:4px;align-items:center;flex:none}
+.items .r b{margin-inline-end:6px}
+.items button{font-size:13px;font-weight:700;padding:4px 8px;border-radius:8px}
+.items .e{color:var(--blue)}
+.items .d{color:var(--warn)}
+.empty{color:var(--muted);font-size:14px;margin-top:6px}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 10px;border-radius:99px;background:var(--soft);font-size:13px;font-weight:700}
+.chip.fav{background:var(--surface2)}
+.chip.fav b{color:var(--muted);font-weight:600;margin-inline-start:4px}
+.form{display:grid;gap:10px;margin-top:10px}
+.form .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.form label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.form input,.form select{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}
+.btn{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:14px;padding:10px 16px;font-weight:800;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface);border:1px solid var(--line);color:var(--fg);font-weight:700}
+.btn.small{min-height:40px;padding:8px 14px;font-size:14px}
+.row-btns{display:flex;gap:8px;flex-wrap:wrap}
+.row-btns .btn{flex:1}
+.wlist{display:flex;gap:8px;align-items:flex-end;margin-top:10px}
+.wlist input{flex:1;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface2)}
+.wsvg{width:100%;height:auto;margin-top:12px;display:block}
+/* login */
+.login{display:flex;flex-direction:column;min-height:calc(100vh - 80px);max-width:440px;margin:0 auto;padding-top:24px;gap:12px}
+.hero{text-align:center;margin-bottom:auto;margin-top:auto}
+.hero .mark{width:84px;height:84px;margin:0 auto 18px;border-radius:26px;background:var(--accent);display:grid;place-items:center}
+.hero .mark svg{width:46px;height:46px}
+.hero h1{font-family:var(--fd);font-weight:800;font-size:44px}
+.hero p{color:var(--muted);margin-top:10px;max-width:30ch;margin-inline:auto}
+.sbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:54px;border-radius:16px;font-weight:700;border:1px solid var(--line);background:var(--surface)}
+.sbtn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.sbtn svg{width:20px;height:20px;flex:none}
+.note{font-size:13px;color:var(--muted);text-align:center;margin-top:6px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:700;font-size:14px;z-index:9;max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<section id="login" class="login">
+  <div class="tools" style="justify-content:flex-end">
+    <div class="tools" role="group" aria-label="Language">
+      <button class="pill" data-lang="en" aria-pressed="true">EN</button>
+      <button class="pill" data-lang="ar" aria-pressed="false">عربي</button>
+      <button class="pill" data-lang="fr" aria-pressed="false">FR</button>
+      <button class="pill" data-lang="es" aria-pressed="false">ES</button>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#0B2416" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg></div>
+    <h1 data-i="brand">Wajbati</h1>
+    <p data-i="tag">Log your meals and see your calories at a glance.</p>
+  </div>
+  <button class="sbtn" id="gbtn" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M22.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2.1-1.9 3.3-4.8 3.3-8.1z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.2 1.1-3.8 1.1-2.9 0-5.4-2-6.2-4.6H2.2v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.8 14.1A6.6 6.6 0 0 1 5.4 12c0-.7.1-1.5.4-2.1V7.1H2.2A11 11 0 0 0 1 12c0 1.8.4 3.5 1.2 4.9z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.2 1.6l3.2-3.2A11 11 0 0 0 2.2 7.1l3.6 2.8C6.6 7.4 9.1 5.4 12 5.4z"/></svg>
+    <span data-i="google">Continue with Google</span>
+  </button>
+  <button class="sbtn primary" id="abtn" type="button">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.5 2-3.7 2.1-3.8-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9s-2-.9-3.3-.9c-1.7 0-3.3 1-4.2 2.5-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8s2 .8 3.3.8c1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9-.1 0-2.7-1-2.7-4zM14 5.1c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>
+    <span data-i="apple">Continue with Apple</span>
+  </button>
+  <p class="note" data-i="note">Sign-in is a preview. Real accounts will be added in the next step.</p>
+</section>
+
+<!-- HOME -->
+<main id="home" class="wrap" hidden>
+  <header class="top">
+    <div class="brand"><i><svg viewBox="0 0 24 24" fill="none" stroke="#0B2416" stroke-width="2.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg></i><span>Wajbati</span></div>
+    <div class="tools">
+      <button class="icon-btn" id="theme" type="button" aria-label="Theme">◐</button>
+      <div class="tools" role="group" aria-label="Language">
+        <button class="pill" data-lang="en" aria-pressed="true">EN</button>
+        <button class="pill" data-lang="ar" aria-pressed="false">عربي</button>
+        <button class="pill" data-lang="fr" aria-pressed="false">FR</button>
+        <button class="pill" data-lang="es" aria-pressed="false">ES</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="card">
+    <p class="eyebrow" data-i="today">Today</p>
+    <div class="big" id="total">0</div>
+    <p class="muted" id="ofgoal"></p>
+    <div class="bar" id="bar"><i style="width:0%"></i></div>
+    <div class="goal">
+      <label for="goal" class="muted" data-i="goalLbl">Daily goal (kcal)</label>
+      <input id="goal" type="number" inputmode="numeric" min="800" max="6000" step="50">
+    </div>
+    <div class="macros">
+      <div class="macro"><b id="pro">0</b><small data-i="protein">Protein g</small></div>
+      <div class="macro"><b id="car">0</b><small data-i="carbs">Carbs g</small></div>
+      <div class="macro"><b id="fat">0</b><small data-i="fat">Fat g</small></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="row-btns" style="justify-content:space-between;align-items:center">
+      <h2 class="sec-title" data-i="waterT">Water</h2>
+      <span class="muted" id="waterTxt"></span>
+    </div>
+    <div class="glasses" id="glasses"></div>
+  </section>
+
+  <section class="card">
+    <p class="eyebrow" data-i="week">Last 7 days</p>
+    <div class="chart" id="chart"></div>
+  </section>
+
+  <section class="card">
+    <h2 class="sec-title" id="formTitle" data-i="addTitle">Add food</h2>
+    <div class="presets" id="favs" style="margin-top:10px"></div>
+    <div class="presets" id="presets" style="margin-top:8px"></div>
+    <form id="addForm" class="form" autocomplete="off">
+      <div><label for="fName" data-i="name">Food name</label><input id="fName" type="text" maxlength="40" required></div>
+      <div class="row">
+        <div><label for="fKcal" data-i="kcal">kcal</label><input id="fKcal" type="number" inputmode="numeric" min="1" max="5000" required></div>
+        <div><label for="fMeal" data-i="mealLbl">Meal</label><select id="fMeal"></select></div>
+      </div>
+      <div class="row3">
+        <div><label for="fPro" data-i="protein">Protein g</label><input id="fPro" type="number" inputmode="decimal" min="0" max="500"></div>
+        <div><label for="fCar" data-i="carbs">Carbs g</label><input id="fCar" type="number" inputmode="decimal" min="0" max="500"></div>
+        <div><label for="fFat" data-i="fat">Fat g</label><input id="fFat" type="number" inputmode="decimal" min="0" max="500"></div>
+      </div>
+      <div class="row-btns">
+        <button class="btn" type="submit" id="submitBtn" data-i="addBtn">Add</button>
+        <button class="btn ghost" type="button" id="cancelEdit" data-i="cancel" hidden>Cancel</button>
+        <button class="btn ghost" type="button" id="saveFav" data-i="saveFav">Save as favorite</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" id="meals"></section>
+
+  <section class="card">
+    <h2 class="sec-title" data-i="weightT">Weight</h2>
+    <div class="wlist">
+      <div style="flex:1"><label for="wIn" class="muted" data-i="todayW">Today's weight (kg)</label><input id="wIn" type="number" inputmode="decimal" step="0.1" min="30" max="300"></div>
+      <button class="btn small" id="wAdd" type="button" data-i="add">Add</button>
+    </div>
+    <p class="muted" id="wNow" style="margin-top:8px"></p>
+    <div id="wChart"></div>
+  </section>
+
+  <section class="card">
+    <div class="row-btns">
+      <button class="btn ghost" id="exportBtn" type="button" data-i="export">Export my data</button>
+      <button class="btn ghost" id="signout" type="button" data-i="signout">Sign out</button>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const T={
+en:{brand:'Wajbati',tag:'Log your meals and see your calories at a glance.',google:'Continue with Google',apple:'Continue with Apple',note:'Sign-in is a preview. Real accounts will be added in the next step.',
+  today:'Today',ofGoal:'of {0} kcal',left:'{0} kcal left',over:'{0} kcal over',goalLbl:'Daily goal (kcal)',protein:'Protein g',carbs:'Carbs g',fat:'Fat g',week:'Last 7 days',
+  addTitle:'Add food',editTitle:'Edit food',addBtn:'Add',saveBtn:'Save changes',cancel:'Cancel',saveFav:'Save as favorite',name:'Food name',kcal:'kcal',mealLbl:'Meal',
+  breakfast:'Breakfast',lunch:'Lunch',dinner:'Dinner',snack:'Snack',empty:'Nothing logged yet.',del:'Delete',edit:'Edit',repeat:'Repeat yesterday',
+  signout:'Sign out',added:'Added',updated:'Updated',removed:'Removed',nameErr:'Enter a food name and calories.',goalErr:'Goal must be between 800 and 6000.',
+  favSaved:'Saved to favorites',favRemoved:'Removed from favorites',favEmpty:'No favorites yet. Save a food to see it here.',
+  waterT:'Water',glasses:'{0} / {1} glasses',weightT:'Weight',todayW:'Today’s weight (kg)',add:'Add',wSaved:'Weight saved',wErr:'Enter a valid weight.',wNow:'Latest: {0} kg',wNone:'No weight logged yet.',
+  export:'Export my data',exported:'Data exported',repeatDone:'Copied from yesterday',repeatNone:'Nothing to copy from yesterday.',dir:'ltr',theme:'Theme'},
+ar:{brand:'وجبتي',tag:'سجّل وجباتك وشوف سعراتك في لمحة.',google:'المتابعة عبر Google',apple:'المتابعة عبر Apple',note:'تسجيل الدخول نسخة تجريبية. الحسابات الحقيقية غتزاد في المرحلة الجاية.',
+  today:'اليوم',ofGoal:'من {0} سعرة',left:'باقي {0} سعرة',over:'زدتي {0} سعرة',goalLbl:'الهدف اليومي (سعرة)',protein:'بروتين غ',carbs:'كربوهيدرات غ',fat:'دهون غ',week:'آخر 7 أيام',
+  addTitle:'زيد أكلة',editTitle:'عدّل الأكلة',addBtn:'زيد',saveBtn:'سجّل التعديل',cancel:'إلغاء',saveFav:'حفظ كمفضلة',name:'اسم الأكلة',kcal:'سعرات',mealLbl:'الوجبة',
+  breakfast:'الفطور',lunch:'الغداء',dinner:'العشاء',snack:'وجبة خفيفة',empty:'ما تسجلش والو بعد.',del:'حيد',edit:'عدّل',repeat:'عاود أمس',
+  signout:'تسجيل الخروج',added:'تزادت',updated:'تبدلات',removed:'تحيدات',nameErr:'دخل اسم الأكلة والسعرات.',goalErr:'الهدف خاص يكون بين 800 و6000.',
+  favSaved:'تحفظات فالمفضلة',favRemoved:'تحيدات من المفضلة',favEmpty:'ما عندكش مفضلات بعد. احفظ أكلة باش تبان هنا.',
+  waterT:'الماء',glasses:'{0} / {1} كؤوس',weightT:'الوزن',todayW:'وزن اليوم (كغ)',add:'زيد',wSaved:'تسجل الوزن',wErr:'دخل وزن صحيح.',wNow:'آخر وزن: {0} كغ',wNone:'ما تسجلش والو وزن.',
+  export:'صدّر بياناتي',exported:'تصدرو البيانات',repeatDone:'تنسخات من أمس',repeatNone:'ما كاينش شي باش ننسخو من أمس.',dir:'rtl',theme:'المظهر'},
+fr:{brand:'Wajbati',tag:'Notez vos repas et voyez vos calories en un coup d’œil.',google:'Continuer avec Google',apple:'Continuer avec Apple',note:'La connexion est une version de test. Les vrais comptes arriveront à l’étape suivante.',
+  today:'Aujourd’hui',ofGoal:'sur {0} kcal',left:'il reste {0} kcal',over:'{0} kcal en trop',goalLbl:'Objectif quotidien (kcal)',protein:'Protéines g',carbs:'Glucides g',fat:'Lipides g',week:'7 derniers jours',
+  addTitle:'Ajouter un aliment',editTitle:'Modifier l’aliment',addBtn:'Ajouter',saveBtn:'Enregistrer',cancel:'Annuler',saveFav:'Enregistrer en favori',name:'Nom de l’aliment',kcal:'kcal',mealLbl:'Repas',
+  breakfast:'Petit-déjeuner',lunch:'Déjeuner',dinner:'Dîner',snack:'Collation',empty:'Rien d’enregistré pour l’instant.',del:'Supprimer',edit:'Modifier',repeat:'Reprendre hier',
+  signout:'Se déconnecter',added:'Ajouté',updated:'Modifié',removed:'Supprimé',nameErr:'Entrez un nom et des calories.',goalErr:'L’objectif doit être entre 800 et 6000.',
+  favSaved:'Ajouté aux favoris',favRemoved:'Retiré des favoris',favEmpty:'Pas encore de favoris. Enregistrez un aliment pour le voir ici.',
+  waterT:'Eau',glasses:'{0} / {1} verres',weightT:'Poids',todayW:'Poids du jour (kg)',add:'Ajouter',wSaved:'Poids enregistré',wErr:'Entrez un poids valide.',wNow:'Dernier poids : {0} kg',wNone:'Aucun poids enregistré.',
+  export:'Exporter mes données',exported:'Données exportées',repeatDone:'Copié depuis hier',repeatNone:'Rien à copier d’hier.',dir:'ltr',theme:'Thème'},
+es:{brand:'Wajbati',tag:'Registra tus comidas y mira tus calorías de un vistazo.',google:'Continuar con Google',apple:'Continuar con Apple',note:'El inicio de sesión es una vista previa. Las cuentas reales llegarán en el siguiente paso.',
+  today:'Hoy',ofGoal:'de {0} kcal',left:'quedan {0} kcal',over:'{0} kcal de más',goalLbl:'Objetivo diario (kcal)',protein:'Proteína g',carbs:'Carbohidratos g',fat:'Grasa g',week:'Últimos 7 días',
+  addTitle:'Añadir comida',editTitle:'Editar comida',addBtn:'Añadir',saveBtn:'Guardar cambios',cancel:'Cancelar',saveFav:'Guardar como favorito',name:'Nombre del alimento',kcal:'kcal',mealLbl:'Comida',
+  breakfast:'Desayuno',lunch:'Almuerzo',dinner:'Cena',snack:'Merienda',empty:'Aún no hay nada registrado.',del:'Eliminar',edit:'Editar',repeat:'Repetir ayer',
+  signout:'Cerrar sesión',added:'Añadido',updated:'Actualizado',removed:'Eliminado',nameErr:'Escribe un nombre y las calorías.',goalErr:'El objetivo debe estar entre 800 y 6000.',
+  favSaved:'Guardado en favoritos',favRemoved:'Quitado de favoritos',favEmpty:'Aún no hay favoritos. Guarda una comida para verla aquí.',
+  waterT:'Agua',glasses:'{0} / {1} vasos',weightT:'Peso',todayW:'Peso de hoy (kg)',add:'Añadir',wSaved:'Peso guardado',wErr:'Escribe un peso válido.',wNow:'Último peso: {0} kg',wNone:'Aún no hay peso registrado.',
+  export:'Exportar mis datos',exported:'Datos exportados',repeatDone:'Copiado de ayer',repeatNone:'No hay nada que copiar de ayer.',dir:'ltr',theme:'Tema'}
+};
+const PRESETS=[
+  {n:{en:'Egg',ar:'بيضة',fr:'Œuf',es:'Huevo'},k:78,p:6,c:1,f:5},
+  {n:{en:'Bread slice',ar:'شريحة خبز',fr:'Tranche de pain',es:'Rebanada de pan'},k:80,p:3,c:15,f:1},
+  {n:{en:'Banana',ar:'موزة',fr:'Banane',es:'Plátano'},k:105,p:1,c:27,f:0},
+  {n:{en:'Cooked rice (1 cup)',ar:'أرز مطبوخ (كوب)',fr:'Riz cuit (1 tasse)',es:'Arroz cocido (1 taza)'},k:205,p:4,c:45,f:0},
+  {n:{en:'Chicken breast 100g',ar:'صدر دجاج 100غ',fr:'Blanc de poulet 100g',es:'Pechuga de pollo 100g'},k:165,p:31,c:0,f:4},
+  {n:{en:'Yogurt',ar:'زبادي',fr:'Yaourt',es:'Yogur'},k:150,p:8,c:11,f:8},
+  {n:{en:'Apple',ar:'تفاحة',fr:'Pomme',es:'Manzana'},k:95,p:0,c:25,f:0}
+];
+const MEALS=['breakfast','lunch','dinner','snack'];
+const WATER_GOAL=8;
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let LANG='en', EDIT=null;
+let S={goal:2000,log:{},water:{},weights:[],favs:[],user:null,theme:null};
+
+function load(){try{const r=localStorage.getItem('wj_data');if(r)Object.assign(S,JSON.parse(r));}catch(e){}
+  try{const l=localStorage.getItem('wj_lang');if(l&&T[l])LANG=l;}catch(e){}}
+function save(){try{localStorage.setItem('wj_data',JSON.stringify(S));}catch(e){}}
+function t(k,a,b){let s=(T[LANG]&&T[LANG][k])||T.en[k]||k;if(a!==undefined)s=s.replace('{0}',a);if(b!==undefined)s=s.replace('{1}',b);return s;}
+const keyOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const yest=()=>{const d=new Date();d.setDate(d.getDate()-1);return keyOf(d);};
+const dayItems=k=>S.log[k]||[];
+const tot=arr=>arr.reduce((a,b)=>({k:a.k+(+b.k||0),p:a.p+(+b.p||0),c:a.c+(+b.c||0),f:a.f+(+b.f||0)}),{k:0,p:0,c:0,f:0});
+const fmt=n=>Math.round(n).toLocaleString(LANG==='ar'?'ar-MA':LANG);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function toast(msg){const el=$('#toast');el.textContent=msg;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,1800);}
+
+function applyTheme(){
+  const r=document.documentElement;
+  if(S.theme)r.setAttribute('data-theme',S.theme);else r.removeAttribute('data-theme');
+}
+function applyStatic(){
+  const r=document.documentElement;
+  r.lang=LANG;r.dir=T[LANG].dir;r.setAttribute('lang',LANG);r.setAttribute('dir',T[LANG].dir);
+  $$('[data-i]').forEach(el=>{el.textContent=t(el.dataset.i);});
+  $$('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===LANG?'true':'false'));
+  $('#fMeal').innerHTML=MEALS.map(m=>'<option value="'+m+'">'+t(m)+'</option>').join('');
+  $('#presets').innerHTML=PRESETS.map((p,i)=>'<button class="chip" type="button" data-p="'+i+'">'+esc(p.n[LANG]||p.n.en)+'</button>').join('');
+  $('#goal').value=S.goal;
+  $('#theme').setAttribute('aria-label',t('theme'));
+  $('#submitBtn').textContent=EDIT?t('saveBtn'):t('addBtn');
+  $('#formTitle').textContent=EDIT?t('editTitle'):t('addTitle');
+  try{localStorage.setItem('wj_lang',LANG);}catch(e){}
+}
+
+function renderFavs(){
+  const box=$('#favs');
+  if(!S.favs.length){box.innerHTML='<p class="empty" style="margin:0">'+t('favEmpty')+'</p>';return;}
+  box.innerHTML=S.favs.map((f,i)=>'<span class="chip fav"><button type="button" data-fav="'+i+'">'+esc(f.n)+' <b>'+fmt(f.k)+'</b></button> <button type="button" data-unfav="'+i+'" aria-label="×">×</button></span>').join('');
+}
+
+function render(){
+  const k=keyOf(new Date());
+  const items=dayItems(k);const T0=tot(items);
+  const goal=S.goal||2000;
+  const over=T0.k>goal;
+  $('#total').textContent=fmt(T0.k);
+  $('#ofgoal').textContent=t('ofGoal',fmt(goal))+' · '+(over?t('over',fmt(T0.k-goal)):t('left',fmt(goal-T0.k)));
+  $('#bar').className='bar'+(over?' over':'');
+  $('#bar i').style.width=Math.min(100,T0.k/goal*100)+'%';
+  $('#pro').textContent=fmt(T0.p);$('#car').textContent=fmt(T0.c);$('#fat').textContent=fmt(T0.f);
+
+  // water
+  const w=S.water[k]||0;
+  $('#waterTxt').textContent=t('glasses',w,WATER_GOAL);
+  $('#glasses').innerHTML=Array.from({length:WATER_GOAL},(_,i)=>'<button type="button" class="glass'+(i<w?' on':'')+'" data-w="'+(i+1)+'" aria-label="'+(i+1)+'">'+(i+1)+'</button>').join('');
+
+  // week chart
+  const days=[];const now=new Date();
+  for(let i=6;i>=0;i--){const d=new Date(now);d.setDate(now.getDate()-i);days.push(d);}
+  const vals=days.map(d=>tot(dayItems(keyOf(d))).k);
+  const mx=Math.max(goal,...vals,1);
+  $('#chart').innerHTML=days.map((d,i)=>{
+    const h=Math.max(2,vals[i]/mx*100);
+    const lbl=d.toLocaleDateString(LANG==='ar'?'ar-MA':LANG,{weekday:'short'});
+    return '<div><i class="'+(i===6?'today':'')+'" style="height:'+h+'%"></i><small>'+esc(lbl)+'</small></div>';
+  }).join('');
+
+  // meals
+  const yItems=dayItems(yest());
+  $('#meals').innerHTML=MEALS.map(m=>{
+    const list=items.filter(x=>x.m===m);
+    const mk=tot(list).k;
+    const hasY=yItems.some(x=>x.m===m);
+    const rows=list.length?'<ul class="items">'+list.map(x=>{
+      const sub=[x.p?'P '+fmt(x.p):'',x.c?'C '+fmt(x.c):'',x.f?'F '+fmt(x.f):''].filter(Boolean).join(' · ');
+      return '<li><span class="name">'+esc(x.n)+(sub?'<span class="sub">'+sub+'</span>':'')+'</span><span class="r"><b>'+fmt(x.k)+'</b><button type="button" class="e" data-edit="'+x.id+'">'+t('edit')+'</button><button type="button" class="d" data-del="'+x.id+'">'+t('del')+'</button></span></li>';
+    }).join('')+'</ul>':'<p class="empty">'+t('empty')+'</p>';
+    return '<div class="meal"><div class="meal-h"><h3>'+t(m)+'</h3><div class="acts"><span class="muted">'+fmt(mk)+' kcal</span>'+(hasY?'<button type="button" class="link" data-repeat="'+m+'">'+t('repeat')+'</button>':'')+'</div></div>'+rows+'</div>';
+  }).join('');
+
+  renderFavs();
+  renderWeight();
+}
+
+function renderWeight(){
+  const ws=S.weights.slice().sort((a,b)=>a.d<b.d?-1:1);
+  if(!ws.length){$('#wNow').textContent=t('wNone');$('#wChart').innerHTML='';return;}
+  const last=ws[ws.length-1].w;
+  $('#wNow').textContent=t('wNow',last);
+  if(ws.length<2){$('#wChart').innerHTML='';return;}
+  const W=320,H=120,pl=8,pr=8,pt=10,pb=18;
+  const vals=ws.map(x=>x.w);let mn=Math.min(...vals),mx=Math.max(...vals);if(mx-mn<1){mn-=0.5;mx+=0.5;}
+  const x=i=>pl+i*(W-pl-pr)/(ws.length-1);
+  const y=v=>pt+(1-(v-mn)/(mx-mn))*(H-pt-pb);
+  const pts=ws.map((p,i)=>x(i).toFixed(1)+','+y(p.w).toFixed(1)).join(' ');
+  $('#wChart').innerHTML='<svg class="wsvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+t('weightT')+'"><polyline points="'+pts+'" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+ws.map((p,i)=>'<circle cx="'+x(i).toFixed(1)+'" cy="'+y(p.w).toFixed(1)+'" r="3.5" fill="var(--accent)"/>').join('')+'</svg>';
+}
+
+function resetForm(){
+  EDIT=null;
+  $('#fName').value='';$('#fKcal').value='';$('#fPro').value='';$('#fCar').value='';$('#fFat').value='';
+  $('#cancelEdit').hidden=true;
+  applyStatic();
+}
+
+document.addEventListener('click',e=>{
+  const lb=e.target.closest('[data-lang]');
+  if(lb){LANG=lb.dataset.lang;applyStatic();render();return;}
+  const pb=e.target.closest('[data-p]');
+  if(pb){const p=PRESETS[+pb.dataset.p];$('#fName').value=p.n[LANG]||p.n.en;$('#fKcal').value=p.k;$('#fPro').value=p.p;$('#fCar').value=p.c;$('#fFat').value=p.f;return;}
+  const fb=e.target.closest('[data-fav]');
+  if(fb){const f=S.favs[+fb.dataset.fav];if(f){$('#fName').value=f.n;$('#fKcal').value=f.k;$('#fPro').value=f.p;$('#fCar').value=f.c;$('#fFat').value=f.f;}return;}
+  const uf=e.target.closest('[data-unfav]');
+  if(uf){S.favs.splice(+uf.dataset.unfav,1);save();renderFavs();toast(t('favRemoved'));return;}
+  const wb=e.target.closest('[data-w]');
+  if(wb){const k=keyOf(new Date());const n=+wb.dataset.w;const cur=S.water[k]||0;S.water[k]=(cur===n)?n-1:n;save();render();return;}
+  const eb=e.target.closest('[data-edit]');
+  if(eb){const k=keyOf(new Date());const it=dayItems(k).find(x=>x.id===eb.dataset.edit);if(it){EDIT=it.id;$('#fName').value=it.n;$('#fKcal').value=it.k;$('#fPro').value=it.p||'';$('#fCar').value=it.c||'';$('#fFat').value=it.f||'';$('#fMeal').value=it.m;$('#cancelEdit').hidden=false;applyStatic();$('#addForm').scrollIntoView({behavior:'smooth',block:'start'});}return;}
+  const db=e.target.closest('[data-del]');
+  if(db){const k=keyOf(new Date());S.log[k]=dayItems(k).filter(x=>x.id!==db.dataset.del);save();if(EDIT===db.dataset.del)resetForm();render();toast(t('removed'));return;}
+  const rb=e.target.closest('[data-repeat]');
+  if(rb){const m=rb.dataset.repeat;const y=dayItems(yest()).filter(x=>x.m===m);if(!y.length){toast(t('repeatNone'));return;}const k=keyOf(new Date());if(!S.log[k])S.log[k]=[];y.forEach(x=>S.log[k].push(Object.assign({},x,{id:uid()})));save();render();toast(t('repeatDone'));return;}
+});
+
+$('#addForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const n=$('#fName').value.trim();const k=parseFloat($('#fKcal').value);
+  const p=parseFloat($('#fPro').value)||0,c=parseFloat($('#fCar').value)||0,f=parseFloat($('#fFat').value)||0;
+  if(!n||!(k>0)){toast(t('nameErr'));return;}
+  const today=keyOf(new Date());if(!S.log[today])S.log[today]=[];
+  const meal=$('#fMeal').value;
+  if(EDIT){
+    const it=S.log[today].find(x=>x.id===EDIT);
+    if(it){Object.assign(it,{n:n,k:Math.round(k),p:p,c:c,f:f,m:meal});}
+    save();resetForm();render();toast(t('updated'));
+  }else{
+    S.log[today].push({id:uid(),n:n,k:Math.round(k),p:p,c:c,f:f,m:meal});
+    save();$('#fName').value='';$('#fKcal').value='';$('#fPro').value='';$('#fCar').value='';$('#fFat').value='';render();toast(t('added'));
+  }
+});
+$('#cancelEdit').addEventListener('click',()=>resetForm());
+$('#saveFav').addEventListener('click',()=>{
+  const n=$('#fName').value.trim();const k=parseFloat($('#fKcal').value);
+  if(!n||!(k>0)){toast(t('nameErr'));return;}
+  S.favs.push({n:n,k:Math.round(k),p:parseFloat($('#fPro').value)||0,c:parseFloat($('#fCar').value)||0,f:parseFloat($('#fFat').value)||0});
+  save();renderFavs();toast(t('favSaved'));
+});
+$('#goal').addEventListener('change',e=>{
+  const v=parseFloat(e.target.value);
+  if(!(v>=800&&v<=6000)){toast(t('goalErr'));e.target.value=S.goal;return;}
+  S.goal=Math.round(v);save();render();
+});
+$('#wAdd').addEventListener('click',()=>{
+  const v=parseFloat($('#wIn').value);
+  if(!(v>=30&&v<=300)){toast(t('wErr'));return;}
+  const k=keyOf(new Date());
+  S.weights=S.weights.filter(x=>x.d!==k);S.weights.push({d:k,w:Math.round(v*10)/10});
+  save();$('#wIn').value='';render();toast(t('wSaved'));
+});
+$('#theme').addEventListener('click',()=>{
+  const dark=S.theme?S.theme==='dark':window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches;
+  S.theme=dark?'light':'dark';save();applyTheme();
+});
+$('#exportBtn').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify({exported:new Date().toISOString(),goal:S.goal,log:S.log,water:S.water,weights:S.weights,favs:S.favs},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='wajbati-data.json';document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast(t('exported'));
+});
+$('#gbtn').addEventListener('click',()=>{S.user='Google preview';save();showHome();});
+$('#abtn').addEventListener('click',()=>{S.user='Apple preview';save();showHome();});
+$('#signout').addEventListener('click',()=>{S.user=null;save();showLogin();});
+
+function showHome(){$('#login').hidden=true;$('#home').hidden=false;render();}
+function showLogin(){$('#home').hidden=true;$('#login').hidden=false;}
+
+load();
+applyTheme();
+applyStatic();
+if(S.user)showHome();else showLogin();
+</script>
+</body>
+</html>
